@@ -1,216 +1,82 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Convite</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quer sair comigo?</title>
 <style>
-  :root{
-    --bg:#f7f7f8;
-    --card:#ffffff;
-    --text:#1f1f23;
-    --accent:#222;
-    --muted:#d9d9dd;
-  }
-  html,body{
-    height:100%;
-    margin:0;
-    padding:0;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    background:var(--bg);
-    color:var(--text);
-    -webkit-tap-highlight-color: transparent;
-  }
-  /* Prevent page scrolling so the button always stays within viewport */
-  body{overflow:hidden}
-  .wrap{
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    box-sizing:border-box;
-  }
-  .card{
-    background:var(--card);
-    border-radius:12px;
-    padding:28px 26px;
-    box-shadow:0 6px 24px rgba(20,20,25,0.06);
-    max-width:420px;
-    width:100%;
-    text-align:center;
-    position:relative;
-  }
-  h1{
-    margin:0 0 20px 0;
-    font-size:20px;
-    font-weight:600;
-  }
-  .button-row{
-    display:inline-flex;
-    gap:16px;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-    height:44px; /* reserved space so layout doesn't jump */
-  }
-  button{
-    padding:10px 18px;
-    font-size:16px;
-    border-radius:8px;
-    border:0;
-    cursor:pointer;
-    user-select:none;
-    -webkit-user-select:none;
-    touch-action: manipulation;
-  }
-  #yesBtn{
-    background:var(--accent);
-    color:white;
-    z-index:5;
-    position:relative;
-  }
-  #noBtn{
-    background:var(--muted);
-    color:var(--text);
-    /* starting as static so it's in the flow; we will switch to fixed when needed */
-    position:relative;
-    z-index:6;
-  }
-  .message{
-    display:none;
-    margin-top:22px;
-    font-size:17px;
-    line-height:1.3;
-  }
-  /* Small screens adjustments */
-  @media (max-width:420px){
-    .card{padding:20px;}
-    h1{font-size:18px;margin-bottom:16px;}
-    .button-row{height:48px}
-    button{font-size:15px;padding:10px 16px;border-radius:8px}
-  }
+body{
+  margin:0; height:100vh; display:flex; justify-content:center; align-items:center;
+  background:#faf7f2; font-family:Arial, sans-serif; overflow:hidden;
+}
+#container{text-align:center;}
+button{
+  padding:12px 22px; margin:10px; font-size:18px; cursor:pointer;
+  border-radius:12px; border:none; background:#b64f52; color:white; transition:0.2s;
+}
+#naoBtn{
+  position:absolute;
+  background:white;
+  color:#b64f52;
+  border:2px solid #b64f52;
+}
+#opcoes{display:none;}
+#voucher{display:none; margin-top:20px;}
+.fade{opacity:0; transition:opacity .6s ease;}
+.fade.show{opacity:1;}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card" id="card">
-      <h1>Bora ficar?</h1>
-      <div class="button-row" id="buttonRow">
-        <button id="yesBtn" aria-label="Sim">Sim</button>
-        <button id="noBtn" aria-label="Não">Não</button>
-      </div>
-      <div class="message" id="message" role="status" aria-live="polite">
-        Já imaginava 😏, mas e aí, vai lá na sala ou vamos marcar algo de fato?
-      </div>
-    </div>
+<div id="container">
+  <h1 id="pergunta1" class="fade show">Quer sair comigo?</h1>
+
+  <div id="botoesPergunta1" class="fade show">
+    <button id="simBtn">Sim</button>
+    <button id="naoBtn">Não</button>
   </div>
 
+  <div id="opcoes">
+    <h2>O que você prefere?</h2>
+    <button class="opcao">Comer fora</button>
+    <button class="opcao">Algo na minha casa</button>
+    <button class="opcao">Algo na sua casa</button>
+  </div>
+
+  <div id="voucher">
+    <img src="voucher.png" style="width:320px;">
+    <p style="font-size:20px;">Use esse voucher com sabedoria, prazo de vencimento para o dia 10/12/2025</p>
+  </div>
+</div>
+
 <script>
-(function(){
-  const yes = document.getElementById('yesBtn');
-  const no = document.getElementById('noBtn');
-  const msg = document.getElementById('message');
-  const margin = 12; // space from edges
+const naoBtn = document.getElementById('naoBtn');
+const simBtn = document.getElementById('simBtn');
+const opcoes = document.getElementById('opcoes');
+const voucher = document.getElementById('voucher');
 
-  // Set the NO button to fixed and place it next to YES if possible
-  function makeNoFixed(left, top){
-    no.style.position = 'fixed';
-    no.style.left = (left !== undefined ? left : no.getBoundingClientRect().left) + 'px';
-    no.style.top = (top !== undefined ? top : no.getBoundingClientRect().top) + 'px';
-    no.style.transform = 'translate(0,0)';
-    no.style.transition = 'left 0.16s ease, top 0.16s ease';
-    no.style.zIndex = 9999;
-  }
+const margem = 80;
 
-  function placeNoInitial(){
-    // Wait that layout computed
-    const rYes = yes.getBoundingClientRect();
-    const btnW = no.offsetWidth;
-    const btnH = no.offsetHeight;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+function mover(){
+  const w = window.innerWidth - margem;
+  const h = window.innerHeight - margem;
+  naoBtn.style.left = (Math.random() * w) + 'px';
+  naoBtn.style.top = (Math.random() * h) + 'px';
+}
+naoBtn.addEventListener('mouseover', mover);
+naoBtn.addEventListener('click', mover);
 
-    // try to place to the right of yes
-    let left = Math.round(rYes.right + 12);
-    let top = Math.round(rYes.top);
+simBtn.addEventListener('click', ()=>{
+  document.getElementById('botoesPergunta1').style.display = 'none';
+  document.getElementById('pergunta1').style.display = 'none';
+  opcoes.style.display = 'block';
+});
 
-    // if doesn't fit to right, try left
-    if (left + btnW + margin > vw){
-      left = Math.round(rYes.left - btnW - 12);
-      if (left < margin) left = margin;
-    }
-
-    // clamp top
-    if (top + btnH + margin > vh) top = Math.max(margin, vh - btnH - margin);
-    if (top < margin) top = margin;
-
-    makeNoFixed(left, top);
-  }
-
-  // produce random pos that keeps button fully on screen and avoids overlapping YES
-  function getRandomPositionAvoidingYes(){
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const btnW = no.offsetWidth;
-    const btnH = no.offsetHeight;
-    const yesRect = yes.getBoundingClientRect();
-    const maxX = Math.max(margin, vw - btnW - margin);
-    const maxY = Math.max(margin, vh - btnH - margin);
-
-    for(let i=0;i<60;i++){
-      const x = Math.round(margin + Math.random() * (maxX - margin));
-      const y = Math.round(margin + Math.random() * (maxY - margin));
-      // check overlap with some gap
-      const gap = 12;
-      const overlapX = !(x + btnW + gap < yesRect.left || x > yesRect.right + gap);
-      const overlapY = !(y + btnH + gap < yesRect.top || y > yesRect.bottom + gap);
-      if (!(overlapX && overlapY)) return {x,y};
-    }
-    // fallback
-    return {x: margin, y: margin};
-  }
-
-  function moveNoRandom(){
-    const pos = getRandomPositionAvoidingYes();
-    makeNoFixed(pos.x, pos.y);
-  }
-
-  function attachEvents(){
-    no.addEventListener('mouseenter', moveNoRandom);
-    no.addEventListener('click', (e)=>{ e.preventDefault(); moveNoRandom(); });
-    // Mobile: touchstart moves the button before the tap completes
-    no.addEventListener('touchstart', function(e){
-      // prevent the simulated click so it doesn't accidentally activate
-      e.preventDefault();
-      moveNoRandom();
-    }, {passive:false});
-
-    // reposition on resize/orientation
-    window.addEventListener('resize', () => {
-      placeNoInitial();
-    });
-    window.addEventListener('orientationchange', () => {
-      setTimeout(placeNoInitial, 200);
-    });
-  }
-
-  yes.addEventListener('click', () => {
-    // Show message (keeps buttons visible unless you prefer to hide them)
-    msg.style.display = 'block';
+document.querySelectorAll('.opcao').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    opcoes.style.display = 'none';
+    voucher.style.display = 'block';
   });
-
-  function init(){
-    placeNoInitial();
-    attachEvents();
-  }
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
+});
 </script>
 </body>
 </html>
